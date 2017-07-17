@@ -70,7 +70,7 @@
           {
             src: require('../assets/slideShow/pic3.jpg'),
             title: 'xxx3',
-            href: 'http://xxx.xxx.com'
+            href: 'detail/publish'
           },
           {
             src: require('../assets/slideShow/pic4.jpg'),
@@ -115,20 +115,20 @@
             list: [
               {
                 name: '数据统计',
-                url: 'http://starcraft.com'
+                url: '/detail/count'
               },
               {
                 name: '数据预测',
-                url: 'http://warcraft.com'
+                url: '/detail/forecast'
               },
               {
                 name: '流量分析',
-                url: 'http://overwatch.com',
+                url: '/detail/analysis',
                 hot: true
               },
               {
                 name: '广告发布',
-                url: 'http://hearstone.com'
+                url: '/detail/publish'
               }
             ]
           },
