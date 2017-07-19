@@ -1,7 +1,7 @@
 <template>
   <div class="slide-show" @mouseover="clearInv" @mouseout="runInv">
     <div class="slide-img">
-      <a href="xxx">
+      <a :href="slides[nowIndex].href">
         <img :src="slides[nowIndex].src" />
       </a>
     </div>
