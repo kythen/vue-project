@@ -34,6 +34,7 @@
       chooseSelection(index){
         this.nowIndex = index;
         this.isDrop = false;
+        this.$emit('on-change',this.selections[this.nowIndex]);
       },
       toggleDrop(){
         this.isDrop = !this.isDrop;
