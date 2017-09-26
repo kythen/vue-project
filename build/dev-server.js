@@ -10,7 +10,9 @@ var path = require('path')
 var express = require('express')
 var webpack = require('webpack')
 var proxyMiddleware = require('http-proxy-middleware')
-var webpackConfig = require('./webpack.dev.conf')
+var webpackConfig = (process.env.NODE_ENV === 'testing' || process.env.NODE_ENV === 'production')
+  ? require('./webpack.prod.conf')
+  : require('./webpack.dev.conf')
 
 // default port where dev server listens for incoming traffic
 var port = process.env.PORT || config.dev.port
@@ -29,7 +31,8 @@ var devMiddleware = require('webpack-dev-middleware')(compiler, {
 })
 
 var hotMiddleware = require('webpack-hot-middleware')(compiler, {
-  log: () => {}
+  log: false,
+  heartbeat: 2000
 })
 // force page reload when html-webpack-plugin template changes
 compiler.plugin('compilation', function (compilation) {
@@ -57,37 +60,44 @@ app.use(devMiddleware)
 // enable hot-reload and state-preserving
 // compilation error display
 app.use(hotMiddleware)
+//mock data
+//启动api server
+var apiServer = express();
+//引入body-parser 模块
+var bodyParser = require("body-parser");
+apiServer.use(bodyParser.urlencoded({extended:true}));
+apiServer.use(bodyParser.json());
+//定义api router
+var apiRouter = express.Router();
+var fs = require("fs");
+apiRouter.route("/:apiName")
+.all(function(req,res){
+    //读db.json 中的数据作为接口返回数据
+    fs.readFile('./db.json',function(err,data){
+        if(err) throw err;
+        var data = JSON.parse(data);
+        if(data[req.params.apiName]){
+            res.json(data[req.params.apiName]);
+        }else{
+            res.send('no such api name');
+        }
+    })
+})
+//监听服务地址
+apiServer.use('/api',apiRouter);
+apiServer.listen(port+1,function(err){
+    if(err){
+        console.log(err);
+        return;
+    }
+     console.log("listening at http://localhost:" + (port + 1) + "\n");
+
+})
 
 // serve pure static assets
 var staticPath = path.posix.join(config.dev.assetsPublicPath, config.dev.assetsSubDirectory)
 app.use(staticPath, express.static('./static'))
-//api server
-var apiServer = express();
-var bodyParser = require('body-parser');
-apiServer.use(bodyParser.urlencoded({extended:true}));
-apiServer.use(bodyParser.json());
-var apiRouter = express.Router();
-var fs = require('fs');
-apiRouter.route('/:apiName')
-  .all(function(req,res){
-    fs.readFile('./db.json','utf8',function(err,data){
-      if(err) throw err;
-      var data = JSON.parse(data);
-      if(data[req.params.apiName]){
-        res.json(data[req.params.apiName]);
-      }else{
-        res.send('no such api name')
-      }
-    })
-  })
-apiServer.use('/api',apiRouter);
-apiServer.listen(port+1,function(err){
-  if(err){
-    console.log(err);
-    return; 
-  }
-  console.log("listenting at http://localhost:" + (port + 1) + "\n");
-})
+
 var uri = 'http://localhost:' + port
 
 var _resolve
